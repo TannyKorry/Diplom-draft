@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'backend_api',
     'rest_framework',
 
+    'rest_framework.authtoken',
+    'django_rest_passwordreset',
+
 ]
 
 MIDDLEWARE = [
@@ -134,7 +137,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'backend_api.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = 'netology-pdiplom@mail.ru'
+EMAIL_HOST_PASSWORD = 'i~8W4rdRPFlo'
+EMAIL_PORT = '465'
+EMAIL_USE_SSL = True
+SERVER_EMAIL = EMAIL_HOST_USER
+
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
