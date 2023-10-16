@@ -25,17 +25,20 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name', 'state', ]
+    list_filter = ['name', 'state', ]
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name', ]
+    list_filter = ['name', 'shops', ]
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name', ]
+    list_filter = ['name', ]
 
 
 @admin.register(ProductInfo)

@@ -77,7 +77,7 @@ class User(AbstractUser):
     )
     is_active = models.BooleanField(
         _('active'),
-        default=False,
+        default=True,
         help_text=_(
             'Designates whether this user should be treated as active. '
             'Unselect this instead of deleting accounts.'
@@ -162,8 +162,8 @@ class Parameter(models.Model):
     name = models.CharField(max_length=40, verbose_name='Название')
 
     class Meta:
-        verbose_name = 'Имя параметра'
-        verbose_name_plural = "Список имен параметров"
+        verbose_name = 'Название параметра'
+        verbose_name_plural = "Список названий параметров"
         ordering = ('-name',)
 
     def __str__(self):
@@ -219,7 +219,7 @@ class Order(models.Model):
 
     class Meta:
         verbose_name = 'Заказ'
-        verbose_name_plural = "Список заказ"
+        verbose_name_plural = "Список заказов"
         ordering = ('-dt',)
 
     def __str__(self):
