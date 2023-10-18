@@ -15,9 +15,9 @@ from rest_framework.views import APIView
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
-from .models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
+from .models import Shop, Category, Product, Pricat, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken
-from .serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
+from .serializers import UserSerializer, CategorySerializer, ShopSerializer, PricatSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
 from .signals import new_user_registered, new_order
 
@@ -163,7 +163,7 @@ class ShopView(ListAPIView):
     serializer_class = ShopSerializer
 
 
-class ProductInfoView(APIView):
+class PricatView(APIView):
     """
     Класс для поиска товаров
     """
@@ -180,12 +180,12 @@ class ProductInfoView(APIView):
             query = query & Q(product__category_id=category_id)
 
         # фильтруем и отбрасываем дуликаты
-        queryset = ProductInfo.objects.filter(
+        queryset = Pricat.objects.filter(
             query).select_related(
             'shop', 'product__category').prefetch_related(
             'product_parameters__parameter').distinct()
 
-        serializer = ProductInfoSerializer(queryset, many=True)
+        serializer = PricatSerializer(queryset, many=True)
 
         return Response(serializer.data)
 
@@ -312,13 +312,13 @@ class PartnerUpdate(APIView):
                     category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
                     category_object.shops.add(shop.id)
                     category_object.save()
-                ProductInfo.objects.filter(shop_id=shop.id).delete()
+                Pricat.objects.filter(shop_id=shop.id).delete()
                 for item in data['goods']:
                     product, _ = Product.objects.get_or_create(name=item['name'], category_id=item['category'])
 
-                    product_info = ProductInfo.objects.create(product_id=product.id,
-                                                              external_id=item['id'],
-                                                              model=item['model'],
+                    product_info = Pricat.objects.create(product_id=product.id,
+                                                              # external_id=item['id'],
+                                                              # model=item['model'],
                                                               price=item['price'],
                                                               price_rrc=item['price_rrc'],
                                                               quantity=item['quantity'],

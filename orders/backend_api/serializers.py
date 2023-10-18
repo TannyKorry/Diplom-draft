@@ -1,7 +1,7 @@
 # Верстальщик
 from rest_framework import serializers
 
-from .models import User, Category, Shop, ProductInfo, Product, ProductParameter, OrderItem, Order, Contact
+from .models import User, Category, Shop, Pricat, Product, ProductParameter, OrderItem, Order, Contact
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -53,13 +53,13 @@ class ProductParameterSerializer(serializers.ModelSerializer):
         fields = ('parameter', 'value',)
 
 
-class ProductInfoSerializer(serializers.ModelSerializer):
+class PricatSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     product_parameters = ProductParameterSerializer(read_only=True, many=True)
 
     class Meta:
-        model = ProductInfo
-        fields = ('id', 'model', 'product', 'shop', 'quantity', 'price', 'price_rrc', 'product_parameters',)
+        model = Pricat
+        fields = ('id', 'product', 'shop', 'quantity', 'price', 'price_rrc', 'product_parameters',)
         read_only_fields = ('id',)
 
 
@@ -74,7 +74,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderItemCreateSerializer(OrderItemSerializer):
-    product_info = ProductInfoSerializer(read_only=True)
+    product_info = PricatSerializer(read_only=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -85,5 +85,5 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'ordered_items', 'state', 'dt', 'total_sum', 'contact',)
+        fields = ('id', 'ordered_items', 'state', 'created_at', 'total_sum', 'contact',)
         read_only_fields = ('id',)
