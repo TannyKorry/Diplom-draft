@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_rest_passwordreset.tokens import get_token_generator
 
+
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
     ('new', 'Новый'),
@@ -128,17 +129,20 @@ class Category(models.Model):
 
 class Product(models.Model):
     article = models.CharField(max_length=30, verbose_name='Артикул', null=True, blank=True)
-    name = models.CharField(max_length=80, verbose_name='Наименование товара')
+    name = models.CharField(max_length=80, verbose_name='Наименование товара', null=False, blank=False)
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
                                  on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Продукт'
-        verbose_name_plural = "Список продуктов"
-        ordering = ('-name', '-article', '-category')
+        verbose_name_plural = "Перечень номенклатуры"
+        constraints = [
+            models.UniqueConstraint(fields=['article', 'name', ], name='unique_product_name'),
+        ]
+        ordering = ('-article', '-name', '-category')
 
     def __str__(self):
-        return f'{self.category} / {self.id}_{self.article}. {self.name}'
+        return f'{self.article}. {self.name}'
 
 
 class Pricat(models.Model):
@@ -176,7 +180,7 @@ class Parameter(models.Model):
 
 
 class ProductParameter(models.Model):
-    product_info = models.ForeignKey(Pricat, verbose_name='Информация о продукте',
+    product_info = models.ForeignKey(Product, verbose_name='Информация о продукте',
                                      related_name='product_parameters', blank=True,
                                      on_delete=models.CASCADE)
     parameter = models.ForeignKey(Parameter, verbose_name='Параметр', related_name='product_parameters', blank=True,
@@ -184,12 +188,13 @@ class ProductParameter(models.Model):
     value = models.CharField(verbose_name='Значение', max_length=100)
 
     class Meta:
-        verbose_name = 'Параметр'
-        verbose_name_plural = "Список параметров"
+        verbose_name = 'Параметр товара'
+        verbose_name_plural = "Список параметров товара"
         constraints = [
             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
         ]
-
+    def __str__(self):
+        return f'{self.id}'
 
 class Contact(models.Model):
     user = models.ForeignKey(User, verbose_name='Пользователь',
@@ -216,7 +221,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              related_name='orders', blank=True,
                              on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Время создания')
+    created_at = models.DateTimeField(auto_now_add=True, null=False, verbose_name='Время создания')
     state = models.CharField(verbose_name='Статус', choices=STATE_CHOICES, max_length=15)
     contact = models.ForeignKey(Contact, verbose_name='Контакт',
                                 blank=True, null=True,
@@ -243,11 +248,12 @@ class OrderItem(models.Model):
 
     class Meta:
         verbose_name = 'Заказанная позиция'
-        verbose_name_plural = "Список заказанных позиций(OrderItem)"
+        verbose_name_plural = "Список заказанных позиций"
         constraints = [
             models.UniqueConstraint(fields=['order_id', 'product_info'], name='unique_order_item'),
         ]
-
+    def __str__(self):
+        return f'{self.id}'
 
 class ConfirmEmailToken(models.Model):
     class Meta:
