@@ -52,21 +52,23 @@ class ProductParameterSerializer(serializers.ModelSerializer):
         model = ProductParameter
         fields = ('parameter', 'value',)
 
+#read_only=True
+
 
 class PricatSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
+    product = ProductSerializer()
     product_parameters = ProductParameterSerializer(read_only=True, many=True)
 
     class Meta:
         model = Pricat
-        fields = ('id', 'product', 'shop', 'quantity', 'price', 'price_rrc', 'product_parameters',)
+        fields = ('shop', 'id', 'product', 'quantity', 'price', 'price_rrc', 'product_parameters',)
         read_only_fields = ('id',)
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ('id', 'product_info', 'quantity', 'order',)
+        fields = ('id', 'order', 'product_info', 'quantity',)
         read_only_fields = ('id',)
         extra_kwargs = {
             'order': {'write_only': True}

@@ -61,12 +61,15 @@ class PricatAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 1
-
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'order', 'quantity', 'product_info', ]
+    list_filter = ['order', 'quantity', ]
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    fields = ('user', 'state', 'contact', 'created_at')
-    list_display = ('id', 'user', 'created_at', 'state', 'contact')
+    fields = ('user', 'state', 'contact', 'total_product')
+    list_display = ('id', 'user', 'state', 'contact')
     inlines = [OrderItemInline, ]
 
 

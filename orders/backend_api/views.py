@@ -1,3 +1,4 @@
+import json
 from distutils.util import strtobool
 
 from django.contrib.auth import authenticate
@@ -6,12 +7,17 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
+from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from requests import get
 from rest_framework.authtoken.models import Token
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet, ModelViewSet
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
@@ -21,7 +27,14 @@ from .serializers import UserSerializer, CategorySerializer, ShopSerializer, Pri
     OrderItemSerializer, OrderSerializer, ContactSerializer
 from .signals import new_user_registered, new_order
 
+def test_view(request):
+    return render(request, 'base.html', {})
+######################################################################
+def authenticated(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
+#######################################################################
 class RegisterAccount(APIView):
     """
     Для регистрации покупателей
@@ -31,10 +44,8 @@ class RegisterAccount(APIView):
 
         # проверяем обязательные аргументы
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
-            errors = {}
 
             # проверяем пароль на сложность
-
             try:
                 validate_password(request.data['password'])
             except Exception as password_error:
@@ -45,8 +56,8 @@ class RegisterAccount(APIView):
                 return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
             else:
                 # проверяем данные для уникальности имени пользователя
-                request.data._mutable = True
-                request.data.update({})
+                # request.data._mutable = True
+                # request.data.update(request.data)
                 user_serializer = UserSerializer(data=request.data)
                 if user_serializer.is_valid():
                     # сохраняем пользователя
@@ -104,7 +115,7 @@ class AccountDetails(APIView):
         # проверяем обязательные аргументы
 
         if 'password' in request.data:
-            errors = {}
+
             # проверяем пароль на сложность
             try:
                 validate_password(request.data['password'])
@@ -161,9 +172,17 @@ class ShopView(ListAPIView):
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['id']
+    search_fields = ['name', 'state', ]
+    ordering_fields = ['name', ]
+    pagination_class = LimitOffsetPagination
 
 
-class PricatView(APIView):
+class PricatViewSet(ModelViewSet):
+    queryset = Pricat.objects.all()
+    serializer_class = PricatSerializer
+
     """
     Класс для поиска товаров
     """
